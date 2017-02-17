@@ -1,4 +1,4 @@
-#ven01.py
+#win01.py
 from Tkinter import *
 
 def Mostrar():
