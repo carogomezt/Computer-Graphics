@@ -27,7 +27,7 @@ class Cartesiano():
         pygame.draw.circle(self.pan, AZUL, self.Tras(p), 2)
 
     def Linea(self, p, q):
-        pygame.draw.line(self.pan, VERDE, self.Tras(p), self.Tras(q), 1)
+        pygame.draw.line(self.pan, AZUL, self.Tras(p), self.Tras(q), 1)
 
     def Poligono(self, l):
         lc=[]
@@ -63,3 +63,8 @@ class Vector():
 
         if e.key == pygame.K_DOWN:
             self.Bajar()
+
+    def AnguloPunto(self, l, angl):
+        px = l * math.cos(math.radians(angl))
+        py = l * math.sin(math.radians(angl))
+        return [px, py]
