@@ -23,6 +23,10 @@ class Cartesiano():
         yp = self.c[1] - p[1]
         return [xp, yp]
 
+    def Puntico(self, p):
+        pygame.draw.circle(self.pan, AZUL, p, 2)
+
+
     def Punto(self, p):
         pygame.draw.circle(self.pan, AZUL, self.Tras(p), 2)
 
