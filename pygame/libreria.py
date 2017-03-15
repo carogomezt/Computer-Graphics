@@ -26,6 +26,8 @@ class Cartesiano():
     def Puntico(self, p):
         pygame.draw.circle(self.pan, AZUL, p, 2)
 
+    def Puntico2(self, p):
+        pygame.draw.circle(self.pan, ROJO, p, 2)
 
     def Punto(self, p):
         pygame.draw.circle(self.pan, AZUL, self.Tras(p), 2)
@@ -39,6 +41,13 @@ class Cartesiano():
             p = self.Tras(elemento)
             lc.append(p)
         pygame.draw.polygon(self.pan, AZUL, lc, 1)
+
+    def Circulo(self, l):
+        for i in range(180, 360):
+            px = l * math.cos(math.radians(i)) + l
+            py = l * math.sin(math.radians(i))
+            p = [int(px), int(py)]
+            pygame.draw.circle(self.pan, AZUL, self.Tras(p), 1)
 
 
 class Vector():
