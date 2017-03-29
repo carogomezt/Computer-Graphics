@@ -1,0 +1,26 @@
+[nivel1]
+origen = img-maze/background.png
+mapa = ............
+       ..######....
+       ..##........
+       ...#........
+       ...#####....
+       ...........$
+
+[.]
+nombre = pasto
+ux = 11
+uy = 0
+muro = 0
+
+[#]
+nombre = pared
+ux = 0
+uy = 4
+muro = 1
+
+[$]
+nombre = hielo
+ux = 14
+uy = 2
+muro = 2
