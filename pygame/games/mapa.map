@@ -24,4 +24,4 @@ muro = 1
 nombre = hielo
 ux = 14
 uy = 0
-muro = 0
+muro = 1
