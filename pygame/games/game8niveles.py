@@ -1,6 +1,7 @@
 import pygame
 import random
 import ConfigParser
+import json
 
 
 
@@ -156,6 +157,9 @@ if __name__ == '__main__':
     todos.add(jp)
     fondo = pygame.image.load('img-maze/fondo.jpg')
     fuente = pygame.font.Font(None, 30)
+
+    leer = json.loads(open('img-maze/mapa.json').read())
+    print leer['layers'][0]['data']
 
 
     fin = False
