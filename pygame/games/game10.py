@@ -20,6 +20,7 @@ class Jugador(pygame.sprite.Sprite):
         self.velocidad = 5
         self.xf = 0
         self.an_img = 0
+        self.flag = True
 
     def Salto(self):
         if self.saltar == 0:
@@ -48,6 +49,7 @@ class Jugador(pygame.sprite.Sprite):
         if self.rect.x >= ANCHO - 80 and self.varx > 0:
             self.rect.x = ANCHO - 80
             self.xf -= 2
+            self.flag = False
             print xf
             #-1280 = anchoimg-anchoventana
             lim = (self.an_img - ANCHO) *(-1)
@@ -56,11 +58,33 @@ class Jugador(pygame.sprite.Sprite):
         elif self.rect.x <= 60 and self.varx < 0:
             self.rect.x = 60
             self.xf += 2
+            self.flag = True
             if self.xf > 0:
                 self.xf = 0
         else:
             self.rect.x += self.varx
         self.rect.y += self.vary
+
+class Plataforma(pygame.sprite.Sprite):
+    def __init__(self, alto, ancho, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image=pygame.Surface([ancho,alto])
+        self.image.fill(VERDE)
+        self.rect = self.image.get_rect()
+        self.rect.x=pos[0]
+        self.rect.y=pos[1]
+        self.flag = True
+        self.varx=pos[0]
+        self.vary=pos[1]
+
+    def update(self):
+        print self.flag
+        if self.flag == False:
+            self.rect.x -= 2
+        if self.flag == True and self.rect.x <= self.varx:
+            self.rect.x +=2
+
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -72,6 +96,11 @@ if __name__ == '__main__':
     jp = Jugador(50, 30)
     jp.an_img = an_img
     todos.add(jp)
+
+    #Plataforma
+    pl = Plataforma(50, 100, (100, 400))
+
+
 
 
     fin = False
@@ -90,6 +119,9 @@ if __name__ == '__main__':
                 if event.key == pygame.K_SPACE:
                     jp.Salto()
                     jp.saltar = 1
+
+        pl.flag = jp.flag
+        todos.add(pl)
 
         xf = jp.xf
         pantalla.blit(fondo, [xf, -520])
