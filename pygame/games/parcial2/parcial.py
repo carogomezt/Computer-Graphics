@@ -134,18 +134,20 @@ class Enemy2(pygame.sprite.Sprite):
     self.muros = []
     self.tierra = []
     self.speed = 8
+    self.var = 0
 
   def update(self):
-    if (self.rect.x >= 17*32) and (self.rect.x <= 23*32) and (self.rect.y == 10*32):
+    self.var += 3
+    if (self.rect.x >= 17*32) and (self.rect.x <= 22*32) and (self.rect.y == 10*32):
         self.dir = 2
         self.rect.x += self.speed
-    if(self.rect.x == (23*32) and (self.rect.y >= 10*32) and (self.rect.y <= 16*32)):
+    if(self.rect.x == (22*32) and (self.rect.y >= 10*32) and (self.rect.y <= 15*32)):
         self.dir = 0
         self.rect.y += self.speed
-    if (self.rect.x >= 20*32) and (self.rect.x <= 23*32) and (self.rect.y == 16*32):
+    if (self.rect.x >= 20*32) and (self.rect.x <= 22*32) and (self.rect.y == 15*32):
         self.dir = 1
         self.rect.x -= self.speed
-    if(self.rect.x == (20*32) and (self.rect.y >= 16*32) and (self.rect.y <= 18*32)):
+    if(self.rect.x == (20*32) and (self.rect.y >= 15*32) and (self.rect.y <= 18*32)):
         self.dir = 0
         self.rect.y += self.speed
     if (self.rect.x >= 12*32) and (self.rect.x <= 20*32) and (self.rect.y == 18*32):
@@ -194,12 +196,37 @@ class Enemy2(pygame.sprite.Sprite):
             self.rect.top = e.rect.bottom
 
 class Enemy3(pygame.sprite.Sprite):
-  def __init__(self, archivo, pos):
-      pygame.sprite.Sprite.__init__(self)
-      self.image = pygame.image.load(archivo).convert_alpha()
-      self.rect = self.image.get_rect()
-      self.rect.x = pos[0]
-      self.rect.y = pos[1]
+    def __init__(self, archivo, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(archivo).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.cont = 0
+
+    def update(self):
+        self.cont += 3
+
+class BulletEnemy(pygame.sprite.Sprite):
+
+    def __init__(self, archivo_img, posx, posy, dire):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(archivo_img).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x= posx
+        self.rect.y= posy
+        self.dir = dire
+        self.speed = 5
+
+    def update(self):
+        if self.dir == 2:
+          self.rect.x += self.speed
+        if self.dir == 1:
+          self.rect.x -= self.speed
+        if self.dir == 0:
+          self.rect.y += self.speed
+        if self.dir == 3:
+          self.rect.y -= self.speed
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -210,7 +237,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x = posx
         self.rect.y = posy
         self.dir = dire
-        self.var_y = 5
+        self.var_y = 8
         self.tierra = []
 
     def update(self):
@@ -372,13 +399,18 @@ if __name__ == '__main__':
     enem_blue = Enemy2(b, [17*32, 10*32])
 
     enem_red = Enemy3('img/red-enemy.png', [23*32, 3*32])
+    enem_white = Enemy3('img/white_enemy.png', [21*32, 7*32])
 
     elements = pygame.sprite.Group()
     blt = pygame.sprite.Group()
+    blt_enemy = pygame.sprite.Group()
+    players = pygame.sprite.Group()
+
     mdf = pygame.sprite.Group()
     enemys = pygame.sprite.Group()
     enemys_blue =  pygame.sprite.Group()
-    enemys_red = pygame.sprite.Group()
+    enemys_static = pygame.sprite.Group()
+
 
 
     md1 = Modifiers('img/modifier1.png', 10*32, 9*32)
@@ -418,7 +450,11 @@ if __name__ == '__main__':
     enem_blue.tierra = tierra
     enem_blue.muros = muros
 
+    enemys_static.add(enem_red)
+    enemys_static.add(enem_white)
+
     elements.add(enem_red)
+    elements.add(enem_white)
     mdf.add(md1)
     enemys.add(enem)
     enemys_blue.add(enem_blue)
@@ -426,6 +462,8 @@ if __name__ == '__main__':
     elements.add(enem_blue)
     elements.add(jp)
     elements.add(md1)
+
+    players.add(jp)
 
     fin = False
     reloj = pygame.time.Clock()
@@ -475,17 +513,31 @@ if __name__ == '__main__':
                 blt.remove(bullet)
                 elements.remove(bullet)
 
+        for bullet in blt:
+            ls = pygame.sprite.spritecollide(bullet, enemys, True)
+            for e in ls:
+                blt.remove(bullet)
+                elements.remove(bullet)
+
+        for bullet in blt:
+            ls = pygame.sprite.spritecollide(bullet, enemys_blue, True)
+            for e in ls:
+                blt.remove(bullet)
+                elements.remove(bullet)
+
+        for bullet in blt:
+            ls = pygame.sprite.spritecollide(bullet, enemys_static, True)
+            for e in ls:
+                blt.remove(bullet)
+                elements.remove(bullet)
+
         dead = pygame.sprite.spritecollide(jp, enemys, False)
         if len(dead) > 0:
-            jp.vida = jp.vida - 100
-            jp.rect.x = 100
-            jp.rect.y = 100
+            jp.vida = jp.vida - 5
 
         dead = pygame.sprite.spritecollide(jp, enemys_blue, False)
         if len(dead) > 0:
-            jp.vida = jp.vida - 100
-            jp.rect.x = 100
-            jp.rect.y = 100
+            jp.vida = jp.vida - 5
 
 
         if finjuego:
@@ -511,11 +563,43 @@ if __name__ == '__main__':
             texto = fuente.render('Vida: ' + vida, True, BLANCO)
             pantalla.blit(texto, [100, 0])
 
+            if enem_red.cont % 13 == 0:
+                blt_enem = BulletEnemy('img/fire.png', enem_red.rect.x+5, enem_red.rect.y+25, 0)
+                blt_enemy.add(blt_enem)
+                elements.add(blt_enem)
+
+            if enem_white.cont % 13 == 0:
+                blt_enem_white = BulletEnemy('img/fire.png', enem_white.rect.x-5, enem_white.rect.y, 1)
+                blt_enemy.add(blt_enem_white)
+                elements.add(blt_enem_white)
+
+            if enem_blue.cont % 17 == 0:
+                blt_enem_blue = BulletEnemy('img/fire.png', enem_blue.rect.x, enem_blue.rect.y, enem_blue.dir)
+                blt_enemy.add(blt_enem_blue)
+                elements.add(blt_enem_blue)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, muros, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, tierra, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, players, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+                    jp.vida -= 20
+
+
             elements.update()
             elements.draw(pantalla)
             pygame.display.flip()
-            
-            blt_enem = Bullet('img/fire.png', enem_red.rect.x-20, enem_red.rect.y+50, 0)
-            blt.add(blt_enem)
-            elements.add(blt_enem)
+
             reloj.tick(20)
