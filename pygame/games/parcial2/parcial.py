@@ -77,7 +77,7 @@ class Enemy(pygame.sprite.Sprite):
     self.rect.y = pos[1]
     self.muros = []
     self.tierra = []
-    self.speed = 2
+    self.speed = 4
 
   def update(self):
     if (self.rect.x >= 9*32) and (self.rect.x <= 11*32) and (self.rect.y == 8*32):
@@ -361,12 +361,16 @@ class Nivel(pygame.sprite.Sprite):
         return info_tierra
 
 
-
 if __name__ == '__main__':
     pygame.init()
     pantalla= pygame.display.set_mode([ANCHO, ALTO])
 
     hero = pygame.image.load('img/character.png').convert_alpha()
+
+    door = pygame.image.load('img/door.png').convert_alpha()
+
+
+
 
     m = []
     for fila in range(4):
@@ -410,10 +414,12 @@ if __name__ == '__main__':
     enemys = pygame.sprite.Group()
     enemys_blue =  pygame.sprite.Group()
     enemys_static = pygame.sprite.Group()
+    keys = pygame.sprite.Group()
 
 
 
     md1 = Modifiers('img/modifier1.png', 10*32, 9*32)
+    key = Modifiers('img/key.png', 4*32, 12*32)
 
     muros = pygame.sprite.Group()
     tierra = pygame.sprite.Group()
@@ -456,20 +462,25 @@ if __name__ == '__main__':
     elements.add(enem_red)
     elements.add(enem_white)
     mdf.add(md1)
+    keys.add(key)
     enemys.add(enem)
     enemys_blue.add(enem_blue)
     elements.add(enem)
     elements.add(enem_blue)
     elements.add(jp)
     elements.add(md1)
+    elements.add(key)
 
     players.add(jp)
+
+
 
     fin = False
     reloj = pygame.time.Clock()
     fuente = pygame.font.Font(None, 30)
     flag = False
     e_modifier = False
+    key_modifier = False
     finjuego = False
 
     while not fin:
@@ -500,6 +511,11 @@ if __name__ == '__main__':
         modifier_collide = pygame.sprite.spritecollide(jp, mdf, True)
         if(len(modifier_collide) > 0):
             e_modifier = True
+
+        key_collide = pygame.sprite.spritecollide(jp, keys, True)
+        if(len(key_collide) > 0):
+            key_modifier = True
+
 
         for bullet in blt:
             ls = pygame.sprite.spritecollide(bullet, tierra, True)
@@ -539,6 +555,42 @@ if __name__ == '__main__':
         if len(dead) > 0:
             jp.vida = jp.vida - 5
 
+        if enem_red.cont % 13 == 0:
+            blt_enem = BulletEnemy('img/fire.png', enem_red.rect.x+5, enem_red.rect.y+25, 0)
+            blt_enemy.add(blt_enem)
+            elements.add(blt_enem)
+
+        if enem_white.cont % 13 == 0:
+            blt_enem_white = BulletEnemy('img/fire.png', enem_white.rect.x-5, enem_white.rect.y, 1)
+            blt_enemy.add(blt_enem_white)
+            elements.add(blt_enem_white)
+
+        if enem_blue.cont % 13 == 0:
+            blt_enem_blue = BulletEnemy('img/fire.png', enem_blue.rect.x, enem_blue.rect.y, enem_blue.dir)
+            blt_enemy.add(blt_enem_blue)
+            elements.add(blt_enem_blue)
+
+        for bullet in blt_enemy:
+            ls = pygame.sprite.spritecollide(bullet, muros, False)
+            for e in ls:
+                blt_enemy.remove(bullet)
+                elements.remove(bullet)
+
+        for bullet in blt_enemy:
+            ls = pygame.sprite.spritecollide(bullet, tierra, False)
+            for e in ls:
+                blt_enemy.remove(bullet)
+                elements.remove(bullet)
+
+        for bullet in blt_enemy:
+            ls = pygame.sprite.spritecollide(bullet, players, False)
+            for e in ls:
+                blt_enemy.remove(bullet)
+                elements.remove(bullet)
+                jp.vida -= 20
+
+
+
 
         if finjuego:
             pantalla.fill(NEGRO)
@@ -560,44 +612,16 @@ if __name__ == '__main__':
                 pantalla.blit(life, [0, 0])
             if(jp.vida <= 0):
                 finjuego = True
+            if (key_modifier == True) and (jp.rect.x >=22*32) and (jp.rect.x <=23*32) and (jp.rect.y >=17*32) and (jp.rect.y <=18*32):
+                pantalla.fill(NEGRO)
+                texto = fuente.render('NIVEL 2', True, BLANCO)
+                pantalla.blit(texto, [250, 200])
+                pygame.display.flip()
+                reloj.tick(10)
+                finjuego = True
+
             texto = fuente.render('Vida: ' + vida, True, BLANCO)
             pantalla.blit(texto, [100, 0])
-
-            if enem_red.cont % 13 == 0:
-                blt_enem = BulletEnemy('img/fire.png', enem_red.rect.x+5, enem_red.rect.y+25, 0)
-                blt_enemy.add(blt_enem)
-                elements.add(blt_enem)
-
-            if enem_white.cont % 13 == 0:
-                blt_enem_white = BulletEnemy('img/fire.png', enem_white.rect.x-5, enem_white.rect.y, 1)
-                blt_enemy.add(blt_enem_white)
-                elements.add(blt_enem_white)
-
-            if enem_blue.cont % 17 == 0:
-                blt_enem_blue = BulletEnemy('img/fire.png', enem_blue.rect.x, enem_blue.rect.y, enem_blue.dir)
-                blt_enemy.add(blt_enem_blue)
-                elements.add(blt_enem_blue)
-
-            for bullet in blt_enemy:
-                ls = pygame.sprite.spritecollide(bullet, muros, False)
-                for e in ls:
-                    blt_enemy.remove(bullet)
-                    elements.remove(bullet)
-
-            for bullet in blt_enemy:
-                ls = pygame.sprite.spritecollide(bullet, tierra, False)
-                for e in ls:
-                    blt_enemy.remove(bullet)
-                    elements.remove(bullet)
-
-            for bullet in blt_enemy:
-                ls = pygame.sprite.spritecollide(bullet, players, False)
-                for e in ls:
-                    blt_enemy.remove(bullet)
-                    elements.remove(bullet)
-                    jp.vida -= 20
-
-
             elements.update()
             elements.draw(pantalla)
             pygame.display.flip()
