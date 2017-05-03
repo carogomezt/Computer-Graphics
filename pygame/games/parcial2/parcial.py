@@ -121,6 +121,20 @@ class Enemy(pygame.sprite.Sprite):
         if self.dir == 3:
             self.rect.top = e.rect.bottom
 
+# class Door(pygame.sprite.Sprite):
+#   def __init__(self, matx, pos):
+#     pygame.sprite.Sprite.__init__(self)
+#     self.matx = matx
+#     self.cont = 0
+#     self.image = self.matx[self.dir][0]
+#     self.rect = self.image.get_rect()
+#     self.rect.x = pos[0]
+#     self.rect.y = pos[1]
+#
+#   def update(self):
+
+
+
 class Enemy2(pygame.sprite.Sprite):
   def __init__(self, matx, pos):
     pygame.sprite.Sprite.__init__(self)
@@ -618,7 +632,16 @@ if __name__ == '__main__':
                 pantalla.blit(texto, [250, 200])
                 pygame.display.flip()
                 reloj.tick(10)
-                finjuego = True
+
+                m = []
+                for fila in range(4):
+                  l_h= []
+                  for i in range(3):
+                    square = hero.subsurface(0+(i*32), 0+(fila*32), 32, 32)
+                    l_h.append(square)
+                  m.append(l_h)
+
+
 
             texto = fuente.render('Vida: ' + vida, True, BLANCO)
             pantalla.blit(texto, [100, 0])
