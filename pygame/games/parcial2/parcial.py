@@ -518,12 +518,21 @@ if __name__ == '__main__':
     key_modifier = False
     finjuego = False
 
-    while not fin:
-        #Captura de eventos
+    continuar = True
+
+    while continuar:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 fin = True
+                continuar = False
 
+    seguir = True
+    victoria = False
+    while seguir and not finjuego:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                fin = True
+                seguir = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     jp.dir = 2
@@ -631,43 +640,99 @@ if __name__ == '__main__':
                 jp.vida -= 20
 
 
+        pantalla.fill(NEGRO)
+        vida = str(jp.vida)
+        pantalla.blit(background, [0, 64])
+        if jp.vida > 200:
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [64, 0])
+        if jp.vida > 100 :
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [32, 0])
+        if jp.vida >=0:
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [0, 0])
+        if(jp.vida <= 0):
+            seguir = False
+            victoria = False
+        if (key_modifier == True) and (jp.rect.x >=22*32) and (jp.rect.x <=23*32) and (jp.rect.y >=17*32) and (jp.rect.y <=18*32):
+            door.open = True
+            victoria = True
+            seguir = False
+            reloj.tick(50)
+
+        texto = fuente.render('Vida: ' + vida, True, BLANCO)
+        pantalla.blit(texto, [100, 0])
+        elements.update()
+        elements.draw(pantalla)
+        pygame.display.flip()
+
+        reloj.tick(20)
 
 
-        if finjuego:
+    if not victoria:
+        seguir = True
+        while seguir:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    fin = True
+                    seguir = False
+                if event.type == pygame.KEYDOWN:
+                    seguir = False
             pantalla.fill(NEGRO)
             texto = fuente.render('GAME OVER', True, BLANCO)
             pantalla.blit(texto, [250, 200])
             pygame.display.flip()
+    else:
+        continuar = True
+        while continuar:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    fin = True
+                    continuar = False
+            continuar = False
 
-        else:
             pantalla.fill(NEGRO)
-            vida = str(jp.vida)
-            pantalla.blit(background, [0, 64])
-            if jp.vida > 200:
-                life = pygame.image.load("img/hearth.png")
-                pantalla.blit(life, [64, 0])
-            if jp.vida > 100 :
-                life = pygame.image.load("img/hearth.png")
-                pantalla.blit(life, [32, 0])
-            if jp.vida >=0:
-                life = pygame.image.load("img/hearth.png")
-                pantalla.blit(life, [0, 0])
-            if(jp.vida <= 0):
-                finjuego = True
-            if (key_modifier == True) and (jp.rect.x >=22*32) and (jp.rect.x <=23*32) and (jp.rect.y >=17*32) and (jp.rect.y <=18*32):
-                pantalla.fill(NEGRO)
-                texto = fuente.render('NIVEL 2', True, BLANCO)
-                pantalla.blit(texto, [250, 200])
-                pygame.display.flip()
-                door.open = True
-                reloj.tick(50)
-
-
-
-            texto = fuente.render('Vida: ' + vida, True, BLANCO)
-            pantalla.blit(texto, [100, 0])
-            elements.update()
-            elements.draw(pantalla)
+            txt = "Nivel 2"
+            texto = fuente.render(txt, True, BLANCO)
+            pantalla.blit(texto, [200, 200])
             pygame.display.flip()
 
-            reloj.tick(20)
+        if victoria:
+            victoria = False
+            seguir = True
+        print "victoria " + str(victoria) + "Seguir " + str(seguir) + "Fin " + str(finjuego)
+        while seguir and not finjuego:
+            #Captura de eventos
+            print "Entre"
+            pantalla.fill(NEGRO)
+            texto = fuente.render('GAne', True, BLANCO)
+            pantalla.blit(texto, [250, 200])
+            pygame.display.flip()
+
+        if not victoria:
+            seguir = True
+            while seguir:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        fin = True
+                        seguir = False
+                    if event.type == pygame.KEYDOWN:
+                        seguir = False
+                pantalla.fill(NEGRO)
+                texto = fuente.render('GAME OVER', True, BLANCO)
+                pantalla.blit(texto, [250, 200])
+                pygame.display.flip()
+        else:
+            seguir = True
+            while seguir:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        fin = True
+                        seguir = False
+                    if event.type == pygame.KEYDOWN:
+                        seguir = False
+                pantalla.fill(NEGRO)
+                texto = fuente.render('YOU WIN', True, BLANCO)
+                pantalla.blit(texto, [250, 200])
+                pygame.display.flip()
