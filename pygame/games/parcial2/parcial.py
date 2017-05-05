@@ -121,17 +121,25 @@ class Enemy(pygame.sprite.Sprite):
         if self.dir == 3:
             self.rect.top = e.rect.bottom
 
-# class Door(pygame.sprite.Sprite):
-#   def __init__(self, matx, pos):
-#     pygame.sprite.Sprite.__init__(self)
-#     self.matx = matx
-#     self.cont = 0
-#     self.image = self.matx[self.dir][0]
-#     self.rect = self.image.get_rect()
-#     self.rect.x = pos[0]
-#     self.rect.y = pos[1]
-#
-#   def update(self):
+class Door(pygame.sprite.Sprite):
+    def __init__(self, matx, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.matx = matx
+        self.cont = 0
+        self.image = self.matx[0][0]
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.open = False
+        self.yp = 0
+
+    def update(self):
+        self.image = self.matx[self.yp][3]
+        if self.open :
+            self.yp += 1
+            if self.yp > 3:
+                self.yp = 3
+
 
 
 
@@ -378,12 +386,22 @@ class Nivel(pygame.sprite.Sprite):
 if __name__ == '__main__':
     pygame.init()
     pantalla= pygame.display.set_mode([ANCHO, ALTO])
+    background = pygame.image.load('img/background.jpg')
 
     hero = pygame.image.load('img/character.png').convert_alpha()
 
-    door = pygame.image.load('img/door.png').convert_alpha()
+    door_image = pygame.image.load('img/door.png').convert_alpha()
 
+    d = []
+    for fila in range(4):
+      l_h= []
+      for i in range(4):
+        square = door_image.subsurface(0+(i*96), 0+(fila*96), 96, 96)
+        print i*32, fila*96
+        l_h.append(square)
+      d.append(l_h)
 
+    door = Door(d,[21.8*32, 16*32])
 
 
     m = []
@@ -429,6 +447,9 @@ if __name__ == '__main__':
     enemys_blue =  pygame.sprite.Group()
     enemys_static = pygame.sprite.Group()
     keys = pygame.sprite.Group()
+    the_doors = pygame.sprite.Group()
+    the_doors.add(door)
+    elements.add(door)
 
 
 
@@ -543,6 +564,12 @@ if __name__ == '__main__':
                 blt.remove(bullet)
                 elements.remove(bullet)
 
+        for bullet in blt_enemy:
+            ls = pygame.sprite.spritecollide(bullet, the_doors, False)
+            for e in ls:
+                blt.remove(bullet)
+                elements.remove(bullet)
+
         for bullet in blt:
             ls = pygame.sprite.spritecollide(bullet, enemys, True)
             for e in ls:
@@ -615,6 +642,7 @@ if __name__ == '__main__':
         else:
             pantalla.fill(NEGRO)
             vida = str(jp.vida)
+            pantalla.blit(background, [0, 64])
             if jp.vida > 200:
                 life = pygame.image.load("img/hearth.png")
                 pantalla.blit(life, [64, 0])
@@ -631,15 +659,8 @@ if __name__ == '__main__':
                 texto = fuente.render('NIVEL 2', True, BLANCO)
                 pantalla.blit(texto, [250, 200])
                 pygame.display.flip()
-                reloj.tick(10)
-
-                m = []
-                for fila in range(4):
-                  l_h= []
-                  for i in range(3):
-                    square = hero.subsurface(0+(i*32), 0+(fila*32), 32, 32)
-                    l_h.append(square)
-                  m.append(l_h)
+                door.open = True
+                reloj.tick(50)
 
 
 
