@@ -290,11 +290,11 @@ class Muro(pygame.sprite.Sprite):
         self.rect.y = pos[1]
 
 class Nivel(pygame.sprite.Sprite):
-    def __init__(self, ar_mapa, an_re, al_re):
+    def __init__(self, ar_mapa, n_nivel,  an_re, al_re):
       pygame.sprite.Sprite.__init__(self)
-      self.mapa = self.Ret_mapa(ar_mapa)
+      self.mapa = self.Ret_mapa(ar_mapa, n_nivel)
       self.fondo = self.Traer_fondo(self.ar_fondo, an_re, al_re)
-      self.tierra = self.Ret_tierra(ar_mapa)
+      self.tierra = self.Ret_tierra(ar_mapa, n_nivel)
 
     def Traer_fondo(self, archivo, an_re, al_re):
       imagen = pygame.image.load('img/background.png')
@@ -314,12 +314,12 @@ class Nivel(pygame.sprite.Sprite):
         tabla.append(fila)
       return tabla
 
-    def Ret_mapa(self, archivo):
+    def Ret_mapa(self, archivo, n_nivel):
       archivo = 'mapaparcial.map'
       mapa = ConfigParser.ConfigParser()
       mapa.read(archivo)
-      self.ar_fondo=  mapa.get('nivel1', 'origen')
-      plano = mapa.get('nivel1', 'mapa').split('\n')
+      self.ar_fondo=  mapa.get(n_nivel, 'origen')
+      plano = mapa.get(n_nivel, 'mapa').split('\n')
       posx = 0
       posy = 0
       d = {}
@@ -348,12 +348,12 @@ class Nivel(pygame.sprite.Sprite):
 
       return info_muros
 
-    def Ret_tierra(self, archivo):
+    def Ret_tierra(self, archivo, n_nivel):
         archivo = 'mapaparcial.map'
         mapa = ConfigParser.ConfigParser()
         mapa.read(archivo)
-        self.ar_fondo=  mapa.get('nivel1', 'origen')
-        plano = mapa.get('nivel1', 'mapa').split('\n')
+        self.ar_fondo=  mapa.get(n_nivel, 'origen')
+        plano = mapa.get(n_nivel, 'mapa').split('\n')
         posx = 0
         posy = 0
         d = {}
@@ -458,7 +458,7 @@ if __name__ == '__main__':
 
     muros = pygame.sprite.Group()
     tierra = pygame.sprite.Group()
-    mapa = Nivel('mapaparcial.map', 32, 32)
+    mapa = Nivel('mapaparcial.map', 'nivel1', 32, 32)
     for ls in mapa.mapa:
         pos_p = ls[0]
         x = pos_p[0]*32
@@ -510,28 +510,34 @@ if __name__ == '__main__':
 
 
 
-    fin = False
+    finjuego = False
     reloj = pygame.time.Clock()
     fuente = pygame.font.Font(None, 30)
     flag = False
     e_modifier = False
     key_modifier = False
-    finjuego = False
-
     continuar = True
-
     while continuar:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                fin = True
+                finjuego = True
+                continuar = False
+            if event.type == pygame.KEYDOWN:
                 continuar = False
 
+        texto = fuente.render('BIENVENIDO', True, BLANCO)
+        descrp = fuente.render('Presiona Cualquier tecla para Continuar', True, BLANCO)
+        pantalla.blit(texto, [350, 250])
+        pantalla.blit(descrp, [200, 300])
+        pygame.display.flip()
+        reloj.tick(60)
     seguir = True
     victoria = False
     while seguir and not finjuego:
+        prueba = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                fin = True
+                finjuego = True
                 seguir = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
@@ -675,7 +681,7 @@ if __name__ == '__main__':
         while seguir:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    fin = True
+                    finjuego = True
                     seguir = False
                 if event.type == pygame.KEYDOWN:
                     seguir = False
@@ -688,34 +694,292 @@ if __name__ == '__main__':
         while continuar:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    fin = True
+                    finjuego = True
                     continuar = False
-            continuar = False
+                if event.type == pygame.KEYDOWN:
+                    continuar = False
 
             pantalla.fill(NEGRO)
             txt = "Nivel 2"
             texto = fuente.render(txt, True, BLANCO)
             pantalla.blit(texto, [200, 200])
             pygame.display.flip()
+        background = pygame.image.load('img/background.jpg')
+
+        hero = pygame.image.load('img/character.png').convert_alpha()
+
+        door_image = pygame.image.load('img/door.png').convert_alpha()
+
+        d = []
+        for fila in range(4):
+          l_h= []
+          for i in range(4):
+            square = door_image.subsurface(0+(i*96), 0+(fila*96), 96, 96)
+            print i*32, fila*96
+            l_h.append(square)
+          d.append(l_h)
+
+        door = Door(d,[21.8*32, 16*32])
+
+
+        m = []
+        for fila in range(4):
+          l_h= []
+          for i in range(3):
+            square = hero.subsurface(0+(i*32), 0+(fila*32), 32, 32)
+            l_h.append(square)
+          m.append(l_h)
+
+        jp = Player(m,[100, 100])
+
+        h = []
+        for fila in range(4):
+          l_h= []
+          for i in range(3):
+            square = hero.subsurface(98+(i*32), 0+(fila*32), 32, 32)
+            l_h.append(square)
+          h.append(l_h)
+
+        enem = Enemy(h, [9*32, 8*32])
+
+        b = []
+        for fila in range(4):
+          l_h= []
+          for i in range(3):
+            square = hero.subsurface((6*32)+(i*32), 0+(fila*32), 32, 32)
+            l_h.append(square)
+          b.append(l_h)
+
+        enem_blue = Enemy2(b, [17*32, 10*32])
+
+        enem_red = Enemy3('img/red-enemy.png', [23*32, 3*32])
+        enem_white = Enemy3('img/white_enemy.png', [21*32, 7*32])
+        elements = pygame.sprite.Group()
+        muros = pygame.sprite.Group()
+        tierra = pygame.sprite.Group()
+        mapa = Nivel('mapaparcial.map', 'nivel2', 32, 32)
+        for ls in mapa.mapa:
+            pos_p = ls[0]
+            x = pos_p[0]*32
+            y = pos_p[1]*32
+            pos_i = ls[1]
+            xi = pos_i[0]
+            yi = pos_i[1]
+            # print ls[0], x, y
+            m = Muro(mapa.fondo[xi][yi], [x, y])
+            muros.add(m)
+            elements.add(m)
+
+        for ls in mapa.tierra:
+            pos_p = ls[0]
+            x = pos_p[0]*32
+            y = pos_p[1]*32
+            pos_i = ls[1]
+            xi = pos_i[0]
+            yi = pos_i[1]
+            # print ls[0], x, y
+            m = Muro(mapa.fondo[xi][yi], [x, y])
+            tierra.add(m)
+            elements.add(m)
+        md1 = Modifiers('img/modifier1.png', 10*32, 9*32)
+        key = Modifiers('img/key.png', 4*32, 12*32)
+        blt = pygame.sprite.Group()
+        blt_enemy = pygame.sprite.Group()
+        players = pygame.sprite.Group()
+
+        mdf = pygame.sprite.Group()
+        enemys = pygame.sprite.Group()
+        enemys_blue =  pygame.sprite.Group()
+        enemys_static = pygame.sprite.Group()
+        keys = pygame.sprite.Group()
+        the_doors = pygame.sprite.Group()
+        the_doors.add(door)
+        elements.add(door)
+
+
+
+
+        jp.tierra = tierra
+        jp.muros = muros
+
+        enem.tierra = tierra
+        enem.muros = muros
+
+        enem_blue.tierra = tierra
+        enem_blue.muros = muros
+
+        enemys_static.add(enem_red)
+        enemys_static.add(enem_white)
+
+        elements.add(enem_red)
+        elements.add(enem_white)
+        mdf.add(md1)
+        keys.add(key)
+        enemys.add(enem)
+        enemys_blue.add(enem_blue)
+        elements.add(enem)
+        elements.add(enem_blue)
+        elements.add(jp)
+        elements.add(md1)
+        elements.add(key)
+
+        players.add(jp)
+        flag = False
+        e_modifier = False
+        key_modifier = False
 
         if victoria:
             victoria = False
             seguir = True
-        print "victoria " + str(victoria) + "Seguir " + str(seguir) + "Fin " + str(finjuego)
+
         while seguir and not finjuego:
             #Captura de eventos
-            print "Entre"
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finjuego = True
+                    seguir = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        jp.dir = 2
+                    if event.key == pygame.K_LEFT:
+                        jp.dir = 1
+                    if event.key == pygame.K_UP:
+                        jp.dir = 3
+                    if event.key == pygame.K_DOWN:
+                        jp.dir = 0
+                    if event.key == pygame.K_SPACE:
+                        # sn_bullet.play()
+                        if(e_modifier == True):
+                            reloj.tick(10)
+                            blt_jp = Bullet('img/bullet.gif', jp.rect.x+ 15, jp.rect.y +15, jp.dir)
+                            blt_jp.tierra = tierra
+                            elements.add(blt_jp)
+                            blt.add(blt_jp)
+
+
+            modifier_collide = pygame.sprite.spritecollide(jp, mdf, True)
+            if(len(modifier_collide) > 0):
+                e_modifier = True
+
+            key_collide = pygame.sprite.spritecollide(jp, keys, True)
+            if(len(key_collide) > 0):
+                key_modifier = True
+
+
+            for bullet in blt:
+                ls = pygame.sprite.spritecollide(bullet, tierra, True)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt:
+                ls = pygame.sprite.spritecollide(bullet, muros, False)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, the_doors, False)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt:
+                ls = pygame.sprite.spritecollide(bullet, enemys, True)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt:
+                ls = pygame.sprite.spritecollide(bullet, enemys_blue, True)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt:
+                ls = pygame.sprite.spritecollide(bullet, enemys_static, True)
+                for e in ls:
+                    blt.remove(bullet)
+                    elements.remove(bullet)
+
+            dead = pygame.sprite.spritecollide(jp, enemys, False)
+            if len(dead) > 0:
+                jp.vida = jp.vida - 5
+
+            dead = pygame.sprite.spritecollide(jp, enemys_blue, False)
+            if len(dead) > 0:
+                jp.vida = jp.vida - 5
+
+            if enem_red.cont % 13 == 0:
+                blt_enem = BulletEnemy('img/fire.png', enem_red.rect.x+5, enem_red.rect.y+25, 0)
+                blt_enemy.add(blt_enem)
+                elements.add(blt_enem)
+
+            if enem_white.cont % 13 == 0:
+                blt_enem_white = BulletEnemy('img/fire.png', enem_white.rect.x-5, enem_white.rect.y, 1)
+                blt_enemy.add(blt_enem_white)
+                elements.add(blt_enem_white)
+
+            if enem_blue.cont % 13 == 0:
+                blt_enem_blue = BulletEnemy('img/fire.png', enem_blue.rect.x, enem_blue.rect.y, enem_blue.dir)
+                blt_enemy.add(blt_enem_blue)
+                elements.add(blt_enem_blue)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, muros, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, tierra, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+
+            for bullet in blt_enemy:
+                ls = pygame.sprite.spritecollide(bullet, players, False)
+                for e in ls:
+                    blt_enemy.remove(bullet)
+                    elements.remove(bullet)
+                    jp.vida -= 20
+
+
             pantalla.fill(NEGRO)
-            texto = fuente.render('GAne', True, BLANCO)
-            pantalla.blit(texto, [250, 200])
+            vida = str(jp.vida)
+            pantalla.blit(background, [0, 64])
+            if jp.vida > 200:
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [64, 0])
+            if jp.vida > 100 :
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [32, 0])
+            if jp.vida >=0:
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [0, 0])
+            if(jp.vida <= 0):
+                seguir = False
+                victoria = False
+            if (key_modifier == True) and (jp.rect.x >=22*32) and (jp.rect.x <=23*32) and (jp.rect.y >=17*32) and (jp.rect.y <=18*32):
+                door.open = True
+                victoria = True
+                seguir = False
+                reloj.tick(50)
+
+            texto = fuente.render('Vida: ' + vida, True, BLANCO)
+            pantalla.blit(texto, [100, 0])
+            elements.update()
+            elements.draw(pantalla)
             pygame.display.flip()
+
+            reloj.tick(20)
 
         if not victoria:
             seguir = True
             while seguir:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        fin = True
+                        finjuego = True
                         seguir = False
                     if event.type == pygame.KEYDOWN:
                         seguir = False
@@ -728,7 +992,7 @@ if __name__ == '__main__':
             while seguir:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        fin = True
+                        finjuego = True
                         seguir = False
                     if event.type == pygame.KEYDOWN:
                         seguir = False
