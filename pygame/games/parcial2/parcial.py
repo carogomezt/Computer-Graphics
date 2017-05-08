@@ -632,7 +632,29 @@ if __name__ == '__main__':
             seguir = False
             reloj.tick(50)
 
-        texto = fuente.render('Vida: ' + vida, True, BLANCO)
+        check = pygame.image.load("img/check.png")
+        if not e_modifier:
+            txt = fuente.render('Take the tree', True, BLANCO)
+            pantalla.blit(txt, [300, 0])
+        else:
+            txt = fuente.render('Take the tree', True, VERDE)
+            pantalla.blit(txt, [300, 0])
+            pantalla.blit(check, [440, 0])
+        if not key_modifier:
+            txt = fuente.render('Take the key', True, BLANCO)
+            pantalla.blit(txt, [300, 20])
+        else:
+            txt = fuente.render('Take the tree', True, VERDE)
+            pantalla.blit(txt, [300, 20])
+            pantalla.blit(check, [440, 20])
+        if not door.open:
+            txt = fuente.render('Open the door', True, BLANCO)
+            pantalla.blit(txt, [300, 40])
+        else:
+            txt = fuente.render('Take the tree', True, VERDE)
+            pantalla.blit(txt, [300, 40])
+            pantalla.blit(check, [480, 40])
+        texto = fuente.render('Life: ' + vida, True, BLANCO)
         pantalla.blit(texto, [100, 0])
         elements.update()
         elements.draw(pantalla)
@@ -849,7 +871,30 @@ if __name__ == '__main__':
                 seguir = False
                 reloj.tick(50)
 
-            texto = fuente.render('Vida: ' + vida, True, BLANCO)
+            check = pygame.image.load("img/check.png")
+            if not e_modifier:
+                txt = fuente.render('Take the tree', True, BLANCO)
+                pantalla.blit(txt, [300, 0])
+            else:
+                txt = fuente.render('Take the tree', True, VERDE)
+                pantalla.blit(txt, [300, 0])
+                pantalla.blit(check, [440, 0])
+            if not key_modifier:
+                txt = fuente.render('Take the key', True, BLANCO)
+                pantalla.blit(txt, [300, 20])
+            else:
+                txt = fuente.render('Take the tree', True, VERDE)
+                pantalla.blit(txt, [300, 20])
+                pantalla.blit(check, [440, 20])
+            if not door.open:
+                txt = fuente.render('Open the door', True, BLANCO)
+                pantalla.blit(txt, [300, 40])
+            else:
+                txt = fuente.render('Take the tree', True, VERDE)
+                pantalla.blit(txt, [300, 40])
+                pantalla.blit(check, [480, 40])
+                
+            texto = fuente.render('Life: ' + vida, True, BLANCO)
             pantalla.blit(texto, [100, 0])
             elements.update()
             elements.draw(pantalla)
