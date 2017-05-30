@@ -5,7 +5,7 @@ import math
 import json
 
 ANCHO=1100
-ALTO= 416
+ALTO= 460
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 ROJO = (255, 0, 0)
@@ -30,6 +30,10 @@ class Player(pygame.sprite.Sprite):
         self.agua = []
         self.final = []
         self.cielo = []
+        self.enemy = []
+        self.enemyMove = []
+        self.enemylevel2 = []
+        self.patron = []
         self.vida = 300
         self.cont = 0
 
@@ -94,13 +98,33 @@ class Player(pygame.sprite.Sprite):
             if len(col_cielo) > 0:
                 self.vida -= 10
 
+            for e in col_cielo:
+                if self.vary > 0:
+                    self.rect.bottom = e.rect.top
+                elif self.vary < 0:
+                    self.rect.top = e.rect.bottom
+                self.vary = 0
+
+            col_enemy = pygame.sprite.spritecollide(self, enemy, False)
+            if len(col_enemy) > 0:
+                self.vida -= 10
+
+            col_enemyMove = pygame.sprite.spritecollide(self, enemyMove, False)
+            if len(col_enemyMove) > 0:
+                self.vida -= 10
+
+            col_enemylevel2 = pygame.sprite.spritecollide(self, self.enemylevel2, False)
+            if len(col_enemylevel2) > 0:
+                self.vida -= 10
+
+            col_patron = pygame.sprite.spritecollide(self, self.patron, False)
+            if len(col_patron) > 0:
+                self.vida = 0
 
 
         self.rect.y += self.vary
-        # self.val += 1
         col_bloques = pygame.sprite.spritecollide(self, bloques, False)
         for e in col_bloques:
-            # print "bloque", e.rect.height
             if self.vary > 0:
                 self.rect.bottom = e.rect.top
             elif self.vary < 0:
@@ -255,6 +279,47 @@ def cargar_EnemigoNivel2(archivo, capa, spriteUnico, spriteGeneral, an_img, tipo
         y+= al_c
         x = 0
 
+def cargar_EnemigoNivel3(archivo, capa, spriteUnico, spriteGeneral, an_img):
+    #abrimos el archivo json
+    with open(archivo) as json_file:
+        base = json.load(json_file)
+
+    #Extraemos informacion de la imagen de fondo
+    ar_sp = ''
+    al_c = 0
+    an_c = 0
+
+    for valor in base['tilesets']:
+        ar_sp = valor['image']
+        al_c = valor['tileheight']
+        an_c = valor['tilewidth']
+        firstgid = valor['firstgid']
+
+    l_sp = listaSpr(ar_sp, al_c, an_c)
+    listam = []
+    muros = base['layers']
+    ancho_c = 0
+    for m in muros:
+        # print m["name"]
+        if m["name"] == capa:
+            listam = m["data"]
+            ancho_c = m["width"]
+    lsep = Separar(listam, ancho_c)
+    x = 0
+    y = 0
+    for fila in lsep:
+        for e in fila:
+            if e != 0:
+                pos = [x, y]
+                img = l_sp[e-firstgid]
+                b = EnemyLevel3(img, pos)
+                b.an_img = an_img
+                spriteUnico.add(b)
+                spriteGeneral.add(b)
+            x += an_c
+        y+= al_c
+        x = 0
+
 def Separar(l, ancho):
     con = 0
     m = []
@@ -366,6 +431,29 @@ class EnemyLevel2(pygame.sprite.Sprite):
         elif self.cont == 100:
             self.cont = 0
 
+class EnemyLevel3(pygame.sprite.Sprite):
+    def __init__(self, obj_img, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('img/momia.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.cont = 0
+        self.varx = 3
+        self.vary = 7
+
+    def update(self):
+        if self.cont < 20:
+            self.rect.y += self.vary
+            self.rect.x -= self.varx
+            self.cont += 1
+        elif self.cont >= 20  and self.cont < 40:
+            self.rect.y -= self.vary
+            self.rect.x -= self.varx
+            self.cont += 1
+        elif self.cont == 40:
+            self.cont = 0
+
 if __name__ == '__main__':
     pygame.init()
     pantalla= pygame.display.set_mode([ANCHO, ALTO])
@@ -395,6 +483,9 @@ if __name__ == '__main__':
     cielo = pygame.sprite.Group()
 
     cargar_fondo('nivel1Cielo.json', 'Cielo', cielo, todos, an_img)
+
+    jp.enemy = enemy
+    jp.enemyMove = enemyMove
     jp.cielo = cielo
     jp.bloques = bloques
     jp.agua = agua
@@ -439,13 +530,27 @@ if __name__ == '__main__':
                     victoria = True
                     seguir = False
 
-        # print "vida", jp.vida
+        print "vida", jp.vida
         todos.update()
         pantalla.blit(fondo, [0, 0])
         todos.draw(pantalla)
         pygame.display.flip()
         # print jp.vida
         # print jp.flag
+        pantalla.fill(NEGRO)
+        vida = str(jp.vida)
+        if jp.vida > 200:
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [64, 428])
+        if jp.vida > 100 :
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [32, 428])
+        if jp.vida >=0:
+            life = pygame.image.load("img/hearth.png")
+            pantalla.blit(life, [0, 428])
+
+        texto = fuente.render('Life: ' + vida, True, BLANCO)
+        pantalla.blit(texto, [100, 428])
         if not jp.flag:
             victoria = True
             seguir = False
@@ -502,12 +607,15 @@ if __name__ == '__main__':
         cargar_fondo('nivel2Peligro.json', 'Peligro', agua, todos, an_img)
         cargar_fondo('nivel2Final.json', 'Final', final, todos, an_img)
 
+
         enemy = pygame.sprite.Group()
         enemyMove = pygame.sprite.Group()
+        enemylevel2 = pygame.sprite.Group()
 
-        cargar_EnemigoNivel2('nivel2Enemigo.json', 'Enemigo', enemy, todos, an_img, 1)
-        cargar_EnemigoNivel2('nivel2Enemigo2.json', 'Enemigo2', enemyMove, todos, an_img, 2)
+        cargar_EnemigoNivel2('nivel2Enemigo.json', 'Enemigo', enemylevel2, todos, an_img, 1)
+        cargar_EnemigoNivel2('nivel2Enemigo2.json', 'Enemigo2', enemylevel2, todos, an_img, 2)
 
+        jp.enemylevel2 = enemylevel2
         jp.flag = True
         jp.bloques = bloques
         jp.final = final
@@ -531,11 +639,31 @@ if __name__ == '__main__':
                     if event.key == pygame.K_SPACE:
                         jp.Salto()
 
+                    if event.key ==pygame.K_s:
+                        victoria = True
+                        seguir = False
+
+            print "vida", jp.vida
             todos.update()
             pantalla.blit(fondo, [0, 0])
             todos.draw(pantalla)
             pygame.display.flip()
-            print "final", jp.flag
+
+            pantalla.fill(NEGRO)
+            vida = str(jp.vida)
+            if jp.vida > 200:
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [64, 428])
+            if jp.vida > 100 :
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [32, 428])
+            if jp.vida >=0:
+                life = pygame.image.load("img/hearth.png")
+                pantalla.blit(life, [0, 428])
+
+            texto = fuente.render('Life: ' + vida, True, BLANCO)
+            pantalla.blit(texto, [100, 428])
+
             if not jp.flag:
                 victoria = True
                 seguir = False
@@ -576,3 +704,114 @@ if __name__ == '__main__':
                 pantalla.blit(descrp, [290, 350])
                 pygame.display.flip()
                 reloj.tick(60)
+
+            fondo= pygame.image.load('nivel3.png')
+            an_img, al_img = fondo.get_size()
+            hero = pygame.image.load('img/character.png').convert_alpha()
+            todos = pygame.sprite.Group()
+            jp = Player(transformImage(hero, 0, 0, 32, 32))
+            jp.an_img = an_img
+
+            bloques = pygame.sprite.Group()
+            agua = pygame.sprite.Group()
+            final = pygame.sprite.Group()
+            cielo = pygame.sprite.Group()
+
+            cargar_fondo('nivel3Muros.json', 'Muros', bloques, todos, an_img)
+            cargar_fondo('nivel3Hielo.json', 'Hielo', agua, todos, an_img)
+            cargar_fondo('nivel3Final.json', 'Final', final, todos, an_img)
+            cargar_fondo('nivel3Cielo.json', 'Cielo', cielo, todos, an_img)
+
+            enemy = pygame.sprite.Group()
+            enemyMove = pygame.sprite.Group()
+            enemylevel2 = pygame.sprite.Group()
+            patron = pygame.sprite.Group()
+
+            cargar_Enemigo('nivel3EnemigoHorizontal.json', 'EnemigoHorizontal', enemyMove, todos, an_img, 2)
+            cargar_EnemigoNivel2('nivel3EnemigoVertical.json', 'EnemigoVertical', enemylevel2, todos, an_img, 1)
+            cargar_EnemigoNivel3('nivel3Patron.json', 'Patron', patron, todos, an_img)
+
+            jp.patron = patron
+            jp.enemyMove = jp.enemyMove
+            jp.enemylevel2 = enemylevel2
+            jp.flag = True
+            jp.bloques = bloques
+            jp.final = final
+            todos.add(jp)
+
+            if victoria:
+                victoria = False
+                seguir = True
+
+            while seguir and not finjuego:
+                #Captura de eventos
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        fin = True
+                        seguir = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            jp.Izquierda()
+                        if event.key == pygame.K_RIGHT:
+                            jp.Derecha()
+                        if event.key == pygame.K_SPACE:
+                            jp.Salto()
+
+
+
+                print "vida", jp.vida
+                todos.update()
+                pantalla.blit(fondo, [0, 0])
+                todos.draw(pantalla)
+                pygame.display.flip()
+
+                pantalla.fill(NEGRO)
+                vida = str(jp.vida)
+                if jp.vida > 200:
+                    life = pygame.image.load("img/hearth.png")
+                    pantalla.blit(life, [64, 428])
+                if jp.vida > 100 :
+                    life = pygame.image.load("img/hearth.png")
+                    pantalla.blit(life, [32, 428])
+                if jp.vida >=0:
+                    life = pygame.image.load("img/hearth.png")
+                    pantalla.blit(life, [0, 428])
+
+                texto = fuente.render('Life: ' + vida, True, BLANCO)
+                pantalla.blit(texto, [100, 428])
+                
+                if not jp.flag:
+                    victoria = True
+                    seguir = False
+                if jp.vida <= 0:
+                    victoria = False
+                    seguir = False
+
+                reloj.tick(20)
+            if not victoria and not finjuego:
+                seguir = True
+                while seguir:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            finjuego = True
+                            seguir = False
+                        if event.type == pygame.KEYDOWN:
+                            seguir = False
+                    pantalla.fill(NEGRO)
+                    win = pygame.image.load('img/gameover.jpg')
+                    pantalla.blit(win, [150, 100])
+                    pygame.display.flip()
+
+            else:
+                seguir = True
+                while seguir and not finjuego:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            finjuego = True
+                            seguir = False
+                        if event.type == pygame.KEYDOWN:
+                            seguir = False
+                    pantalla.fill(NEGRO)
+                    win = pygame.image.load('img/YouWin.png')
+                    pantalla.blit(win, [100, 100])
+                    pygame.display.flip()
