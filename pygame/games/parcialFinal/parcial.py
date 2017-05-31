@@ -492,23 +492,53 @@ if __name__ == '__main__':
     jp.final = final
     todos.add(jp)
     fuente = pygame.font.Font(None, 30)
+    menuText = pygame.font.Font(None, 80)
     finjuego = False
     continuar = True
     reloj = pygame.time.Clock()
     # x = 0
+    menu = 0
+    contador = 0
     while continuar:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finjuego = True
                 continuar = False
             if event.type == pygame.KEYDOWN:
-                continuar = False
+                if event.key == pygame.K_SPACE:
+                    menu = 1
+                if event.key == pygame.K_1:
+                    continuar = False
+                if event.key == pygame.K_2:
+                    menu = 2
+                if event.key == pygame.K_3:
+                    finjuego = True
+                    continuar = False
+                if event.key == pygame.K_ESCAPE:
+                    menu = 1
 
-        intro = pygame.image.load('img/intro.jpg')
-        pantalla.blit(intro, [0, 100])
-        descrp = fuente.render('Press any key to continue', True, BLANCO)
-        pantalla.blit(descrp, [290, 420])
-        pygame.display.flip()
+
+        if menu == 0:
+            intro = pygame.image.load('img/intro.jpg')
+            pantalla.blit(intro, [0, 0])
+            descrp = fuente.render('Press space to continue', True, BLANCO)
+            pantalla.blit(descrp, [450, 420])
+            pygame.display.flip()
+        if menu == 1:
+            menu = pygame.image.load('img/menu.jpg')
+            pantalla.blit(menu, [0, 0])
+            descrp = menuText.render('1. Play', True, NEGRO)
+            pantalla.blit(descrp, [350, 150])
+            descrp = menuText.render('2. Instructions', True, NEGRO)
+            pantalla.blit(descrp, [350, 200])
+            descrp = menuText.render('3. Exit', True, NEGRO)
+            pantalla.blit(descrp, [350, 250])
+            pygame.display.flip()
+        if menu == 2:
+            intro = pygame.image.load('img/instrucciones.jpg')
+            pantalla.blit(intro, [0,0])
+            pygame.display.flip()
+
     seguir = True
     victoria = True
     time = 0
@@ -516,7 +546,7 @@ if __name__ == '__main__':
         #Captura de eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                fin = True
+                finjuego = True
                 seguir = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -530,7 +560,7 @@ if __name__ == '__main__':
                     victoria = True
                     seguir = False
 
-        print "vida", jp.vida
+        # print "vida", jp.vida
         todos.update()
         pantalla.blit(fondo, [0, 0])
         todos.draw(pantalla)
@@ -551,6 +581,10 @@ if __name__ == '__main__':
 
         texto = fuente.render('Life: ' + vida, True, BLANCO)
         pantalla.blit(texto, [100, 428])
+        contador += 1
+        conText = str(contador)
+        texto = fuente.render('Points: ' + conText, True, BLANCO)
+        pantalla.blit(texto, [220, 428])
         if not jp.flag:
             victoria = True
             seguir = False
@@ -571,7 +605,7 @@ if __name__ == '__main__':
                     seguir = False
             pantalla.fill(NEGRO)
             win = pygame.image.load('img/gameover.jpg')
-            pantalla.blit(win, [150, 100])
+            pantalla.blit(win, [150, 0])
             pygame.display.flip()
     else:
         continuar = True
@@ -587,8 +621,8 @@ if __name__ == '__main__':
             fte = pygame.font.Font(None, 80)
             texto = fte.render('LEVEL 2', True, BLANCO)
             descrp = fuente.render('Press any key to continue', True, BLANCO)
-            pantalla.blit(texto, [300, 250])
-            pantalla.blit(descrp, [290, 350])
+            pantalla.blit(texto, [350, 100])
+            pantalla.blit(descrp, [290, 200])
             pygame.display.flip()
             reloj.tick(60)
 
@@ -629,7 +663,7 @@ if __name__ == '__main__':
             #Captura de eventos
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    fin = True
+                    finjuego = True
                     seguir = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
@@ -643,7 +677,7 @@ if __name__ == '__main__':
                         victoria = True
                         seguir = False
 
-            print "vida", jp.vida
+            # print "vida", jp.vida
             todos.update()
             pantalla.blit(fondo, [0, 0])
             todos.draw(pantalla)
@@ -663,6 +697,11 @@ if __name__ == '__main__':
 
             texto = fuente.render('Life: ' + vida, True, BLANCO)
             pantalla.blit(texto, [100, 428])
+
+            contador += 1
+            conText = str(contador)
+            texto = fuente.render('Points: ' + conText, True, BLANCO)
+            pantalla.blit(texto, [220, 428])
 
             if not jp.flag:
                 victoria = True
@@ -684,7 +723,7 @@ if __name__ == '__main__':
                         seguir = False
                 pantalla.fill(NEGRO)
                 win = pygame.image.load('img/gameover.jpg')
-                pantalla.blit(win, [150, 100])
+                pantalla.blit(win, [150, 0])
                 pygame.display.flip()
         else:
             continuar = True
@@ -700,8 +739,8 @@ if __name__ == '__main__':
                 fte = pygame.font.Font(None, 80)
                 texto = fte.render('LEVEL 3', True, BLANCO)
                 descrp = fuente.render('Press any key to continue', True, BLANCO)
-                pantalla.blit(texto, [300, 250])
-                pantalla.blit(descrp, [290, 350])
+                pantalla.blit(texto, [350, 100])
+                pantalla.blit(descrp, [290, 200])
                 pygame.display.flip()
                 reloj.tick(60)
 
@@ -747,7 +786,7 @@ if __name__ == '__main__':
                 #Captura de eventos
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        fin = True
+                        finjuego = True
                         seguir = False
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_LEFT:
@@ -759,7 +798,7 @@ if __name__ == '__main__':
 
 
 
-                print "vida", jp.vida
+                # print "vida", jp.vida
                 todos.update()
                 pantalla.blit(fondo, [0, 0])
                 todos.draw(pantalla)
@@ -779,7 +818,12 @@ if __name__ == '__main__':
 
                 texto = fuente.render('Life: ' + vida, True, BLANCO)
                 pantalla.blit(texto, [100, 428])
-                
+
+                contador += 1
+                conText = str(contador)
+                texto = fuente.render('Points: ' + conText, True, BLANCO)
+                pantalla.blit(texto, [220, 428])
+
                 if not jp.flag:
                     victoria = True
                     seguir = False
@@ -799,7 +843,7 @@ if __name__ == '__main__':
                             seguir = False
                     pantalla.fill(NEGRO)
                     win = pygame.image.load('img/gameover.jpg')
-                    pantalla.blit(win, [150, 100])
+                    pantalla.blit(win, [150, 0])
                     pygame.display.flip()
 
             else:
@@ -813,5 +857,5 @@ if __name__ == '__main__':
                             seguir = False
                     pantalla.fill(NEGRO)
                     win = pygame.image.load('img/YouWin.png')
-                    pantalla.blit(win, [100, 100])
+                    pantalla.blit(win, [100, 0])
                     pygame.display.flip()
